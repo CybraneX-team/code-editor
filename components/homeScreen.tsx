@@ -2,7 +2,7 @@
 import { AppStore, makeStore } from "@/lib/store";
 import { useEffect, useRef, useState } from "react"
 import { Provider, useDispatch } from "react-redux";
-import Projects from "./projects";
+
 
 
 export default function HomeScreen(){
@@ -22,7 +22,7 @@ export default function HomeScreen(){
      
         <div className="">
             <h1 className=" text-2xl">Your projects</h1>
-           <Projects token={token!}/>
+           
         </div>
  
 

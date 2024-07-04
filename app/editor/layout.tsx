@@ -9,11 +9,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
 
+  const storeRef = useRef<AppStore>();
+  if(!storeRef.current){
+    storeRef.current = makeStore();
+  }
+
   return (
-   
+   <Provider store={storeRef.current}>
       <div>
         {children}
       </div>
-   
+      </Provider>
   );
 }
