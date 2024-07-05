@@ -1,13 +1,12 @@
-import React, { useState, FC, useEffect, useRef } from 'react';
+import React, { useState, FC, useEffect } from 'react';
 import { Box, Button, List, ListItem, ListItemText, IconButton, Collapse, Typography, Tooltip, Input } from '@mui/material';
 import { Folder, InsertDriveFile, AddBox, CreateNewFolder, ExpandLess, ExpandMore, Delete } from '@mui/icons-material';
 import JSZip, { JSZipObject } from 'jszip';
 import { useDropzone } from 'react-dropzone';
-import { AppStore, makeStore } from '@/lib/store';
-import { Provider, useDispatch } from 'react-redux';
-import {addItem} from "../lib/slices/fileSlice";
-import {setCurrentFile} from "../lib/slices/currentFileSlice";
-import {FileItem} from "../lib/types";
+import { useDispatch } from 'react-redux';
+import { addItem } from "../lib/slices/fileSlice";
+import { setCurrentFile } from "../lib/slices/currentFileSlice";
+import { FileItem } from "../lib/types";
 import { setStructure } from '@/lib/slices/structureSlice';
 
 export interface ExtendedFile extends File {
@@ -26,24 +25,19 @@ const CodeEditorSidebar: FC = () => {
   const [openFolders, setOpenFolders] = useState<{ [key: string]: boolean }>({});
   const [currentFolder, setCurrentFolder] = useState<string | null>(null);
   const dispatch = useDispatch();
-  
 
   const onDrop = async (acceptedFiles: ExtendedFile[]): Promise<void> => {
     const newFiles: FileItem[] = [];
-
     for (const file of acceptedFiles) {
       if (file.name.endsWith('.zip')) {
         const zip = new JSZip();
         const zipFolder: FileItem = { name: file.name, type: 'folder', files: [] };
-
         const content = await zip.loadAsync(file);
         content.forEach(async (relativePath: string, zipEntry: JSZipObject) => {
           const pathParts = relativePath.split('/');
           const fileName = pathParts.pop() || '';
           const folderPath = pathParts;
-
           let currentLevel = zipFolder.files;
-
           folderPath.forEach((folder) => {
             let existingFolder = currentLevel?.find((f) => f.name === folder && f.type === 'folder');
             if (!existingFolder) {
@@ -52,32 +46,24 @@ const CodeEditorSidebar: FC = () => {
             }
             currentLevel = existingFolder.files;
           });
-
           if (currentLevel) {
             currentLevel.push({ name: fileName, type: 'file' });
           }
-
           const fileContent = await zipEntry.async('text');
-          console.log(`Content of ${relativePath}:`, fileContent);
         });
-
         newFiles.push(zipFolder);
       } else {
         const pathParts = file.webkitRelativePath ? file.webkitRelativePath.split('/') : [file.name];
         const fileName = pathParts.pop() || '';
         const folderPath = pathParts;
-
-
         const reader = new FileReader();
         reader.onabort = () => console.log('file reading was aborted')
         reader.onerror = () => console.log('file reading has failed')
         reader.onload = (e) => {
-          dispatch(addItem({name: file.name, content: reader.result}));
+          dispatch(addItem({ name: file.name, content: reader.result }));
         }
         reader.readAsText(file)
-
         let currentLevel = newFiles;
-
         folderPath.forEach((folder) => {
           let existingFolder = currentLevel.find((f) => f.name === folder && f.type === 'folder');
           if (!existingFolder) {
@@ -86,19 +72,17 @@ const CodeEditorSidebar: FC = () => {
           }
           currentLevel = existingFolder.files!;
         });
-
         if (currentLevel) {
           currentLevel.push({ name: fileName, type: 'file' });
         }
       }
     }
-
     setFiles((prevFiles) => [...prevFiles, ...newFiles]);
   };
 
   const handleAddFile = (): void => {
     if (newFileName) {
-      dispatch(addItem({name: newFileName, content: ""}));
+      dispatch(addItem({ name: newFileName, content: "" }));
       const newFile: FileItem = { name: newFileName, type: 'file' };
       if (currentFolder && openFolders[currentFolder]) {
         setFiles((prevFiles) => {
@@ -151,9 +135,8 @@ const CodeEditorSidebar: FC = () => {
     });
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     dispatch(setStructure(files));
-    console.log(files);
   }, [files, dispatch])
 
   const renderFiles = (fileList: FileItem[], level = 0): JSX.Element[] => (
@@ -187,9 +170,8 @@ const CodeEditorSidebar: FC = () => {
       ) : (
         <ListItem
           key={index}
-          onClick={()=>{
-            dispatch(setCurrentFile(file.name? file.name : ""))
-            console.log("Clicked")
+          onClick={() => {
+            dispatch(setCurrentFile(file.name ? file.name : ""))
           }}
           sx={{
             color: '#fff',
@@ -222,7 +204,7 @@ const CodeEditorSidebar: FC = () => {
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
   return (
-      <Box
+    <Box
       sx={{
         width: '350px',
         backgroundColor: '#1e1e1e',
@@ -238,7 +220,6 @@ const CodeEditorSidebar: FC = () => {
       <Typography variant="h6" sx={{ color: '#fff', marginBottom: '16px' }}>Code Editor</Typography>
       <Button
         variant="contained"
-     //   component="label"
         sx={{ width: '100%', marginBottom: '10px', backgroundColor: '#007acc', '&:hover': { backgroundColor: '#005f99' } }}
         {...getRootProps()}
       >
