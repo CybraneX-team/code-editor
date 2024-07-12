@@ -1,6 +1,6 @@
 import { useAppSelector } from "@/lib/hooks";
 import { Editor } from "@monaco-editor/react";
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react";
 import { CodeEditorWindowProps } from "@/lib/types";
 
 const CodeEditorWindow: React.FC<CodeEditorWindowProps> = ({ onChange, language, code, theme }) => {
@@ -9,23 +9,23 @@ const CodeEditorWindow: React.FC<CodeEditorWindowProps> = ({ onChange, language,
   const currentFile = useAppSelector(state => state.currentFile);
 
   const handleEditorChange = (value: string | undefined) => {
-    if (value == undefined) {
+    if (value === undefined) {
       return;
     }
     setValue(value);
     onChange("code", value);
-  }
+  };
 
   useEffect(() => {
     const currentContent = fileData.filter(file => file.name === currentFile.value)[0];
     setValue(currentContent?.content);
-  }, [currentFile]);
+  }, [currentFile, fileData]);
 
   return (
-    <div className="rounded-md overflow-hidden w-full h-full shadow-xl">
+    <div className="overlay rounded-md overflow-hidden w-full h-full shadow-4xl">
       <Editor
         height="90vh"
-        width="100%"
+        width={"100%"}
         language={language || "python"}
         value={value}
         theme={theme}
@@ -33,7 +33,7 @@ const CodeEditorWindow: React.FC<CodeEditorWindowProps> = ({ onChange, language,
         onChange={handleEditorChange}
       />
     </div>
-  )
-}
+  );
+};
 
 export default CodeEditorWindow;
