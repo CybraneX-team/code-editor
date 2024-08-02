@@ -1,5 +1,6 @@
 import HomeScreen from "@/components/homeScreen";
 import Link from "next/link";
+import { AppProps } from 'next/app';
 
 export default function Home() {
 

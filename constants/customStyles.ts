@@ -8,25 +8,24 @@ export const customStyles = {
     color: "#000",
     fontSize: "0.8rem",
     lineHeight: "1.75rem",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#1e1e1e",
     cursor: "pointer",
-    border: "2px solid #000000",
-    boxShadow: "5px 5px 0px 0px rgba(0,0,0);",
+    border: "1px solid #000000",
+    // boxShadow: "5px 5px 0px 0px rgba(0,0,0);",
     ":hover": {
-      border: "2px solid #000000",
       boxShadow: "none",
     },
   }),
   option: (styles: any) => {
     return {
       ...styles,
-      color: "#000",
+      color: "#fff",
       fontSize: "0.8rem",
       lineHeight: "1.75rem",
       width: "100%",
-      background: "#fff",
+      background: "#1e1e1e",
       ":hover": {
-        backgroundColor: "rgb(243 244 246)",
+        backgroundColor: "#1e1e1e",
         color: "#000",
         cursor: "pointer",
       },
@@ -35,18 +34,16 @@ export const customStyles = {
   menu: (styles: any) => {
     return {
       ...styles,
-      backgroundColor: "#fff",
+      backgroundColor: "#1e1e1e",
       maxWidth: "14rem",
-      border: "2px solid #000000",
       borderRadius: "5px",
-      boxShadow: "5px 5px 0px 0px rgba(0,0,0);",
     };
   },
 
   placeholder: (defaultStyles: any) => {
     return {
       ...defaultStyles,
-      color: "#000",
+      color: "#fff",
       fontSize: "0.8rem",
       lineHeight: "1.75rem",
     };

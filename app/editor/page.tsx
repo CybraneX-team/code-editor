@@ -14,9 +14,10 @@ import { classnames } from "@/utils/general";
 import { Alert, Snackbar } from "@mui/material";
 import CodeEditorSidebar from "@/components/sidebar";
 
-const pythonDefault = '#Start writing\n';
+const pythonDefault = "#Start writing\n";
 
 function Editor() {
+  const [configDropdownOpen, setConfigDropdownOpen] = useState(false);
   const [code, setCode] = useState(pythonDefault);
   const [customInput, setCustomInput] = useState("");
   const [outputDetails, setOutputDetails] = useState({});
@@ -29,8 +30,33 @@ function Editor() {
   const enterPress = useKeyPress("Enter");
   const ctrlPress = useKeyPress("Control");
 
-  const onSelectChange = (sl: SetStateAction<{ id: number; name: string; label: string; value: string; }>) => {
+  const onSelectChange = (
+    sl: SetStateAction<{
+      id: number;
+      name: string;
+      label: string;
+      value: string;
+    }>
+  ) => {
     setLanguage(sl);
+  };
+
+  const ConfigDropdown = ({ onSelectChange, handleThemeChange, theme }) => {
+    return (
+      <div className="absolute mt-2 mb-4 w-100 bg-[#1e1e1e] shadow-sm rounded-md z-10">
+        <div className="flex p-2">
+          <div className="w-1/2 pr-2">
+            <LanguagesDropdown onSelectChange={onSelectChange} />
+          </div>
+          <div className="w-1/2 pl-2">
+            <ThemeDropdown
+              handleThemeChange={handleThemeChange}
+              theme={theme}
+            />
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const handleSnackbarClose = () => {
@@ -82,7 +108,7 @@ function Editor() {
       params: {
         base64_encoded: true,
         wait: false,
-        fields: "*"
+        fields: "*",
       },
       headers: {
         "x-rapidapi-key": "215b5f2942msh500fa27eb32f9fcp192b42jsn9e4cae21929d",
@@ -93,7 +119,7 @@ function Editor() {
         language_id: 92,
         source_code: btoa(code),
         stdin: btoa(customInput),
-      }
+      },
     };
 
     try {
@@ -154,18 +180,40 @@ function Editor() {
   }, []);
 
   return (
-    <div className="flex">
+    <div className="flex h-[500px]">
       <CodeEditorSidebar />
       <div className="flex flex-col w-full">
-        <Snackbar open={snackbar} autoHideDuration={5000} onClose={handleSnackbarClose}>
-          <Alert onClose={handleSnackbarClose} severity={error ? "error" : "success"} variant="filled">
+        <Snackbar
+          open={snackbar}
+          autoHideDuration={5000}
+          onClose={handleSnackbarClose}
+        >
+          <Alert
+            onClose={handleSnackbarClose}
+            severity={error ? "error" : "success"}
+            variant="filled"
+          >
             {snackbarMessage}
           </Alert>
         </Snackbar>
         <div className="flex items-center space-x-4 p-4">
-          <LanguagesDropdown onSelectChange={onSelectChange} />
-          <ThemeDropdown handleThemeChange={handleThemeChange} theme={theme} />
-          <button className="bg-green-500 text-white px-5 py-2 rounded-md">Save</button>
+          {/* <LanguagesDropdown onSelectChange={onSelectChange} />
+          <ThemeDropdown handleThemeChange={handleThemeChange} theme={theme} /> */}
+          <div className="relative">
+            <button
+              onClick={() => setConfigDropdownOpen(!configDropdownOpen)}
+              className="bg-blue-500 text-white px-4 py-2 rounded-md"
+            >
+              Config
+            </button>
+            {configDropdownOpen && (
+              <ConfigDropdown
+                onSelectChange={onSelectChange}
+                handleThemeChange={handleThemeChange}
+                theme={theme}
+              />
+            )}
+          </div>
           <button
             onClick={handleCompile}
             disabled={!code}
@@ -174,16 +222,24 @@ function Editor() {
               !code ? "opacity-50" : ""
             )}
           >
-            {processing ? "Processing..." : "Compile"}
+            {processing ? "Processing..." : "Run"}
+          </button>
+          <button className="bg-green-500 text-white px-5 py-2 rounded-md">
+            Save
           </button>
         </div>
         <div className="flex flex-row space-x-4 p-4">
           <div className="w-3/5">
-            <CodeEditorWindow code={code} onChange={onChange} language={language?.value} theme={theme.value} />
+            <CodeEditorWindow
+              code={code}
+              onChange={onChange}
+              language={language?.value}
+              theme={theme.value}
+            />
           </div>
           <div className="w-2/5 space-y-4">
             <OutputWindow outputDetails={outputDetails} />
-            <OutputDetails outputDetails={outputDetails} />
+            {/* <OutputDetails outputDetails={outputDetails} /> */}
           </div>
         </div>
         <Footer />

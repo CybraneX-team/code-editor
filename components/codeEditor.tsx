@@ -7,6 +7,7 @@ const CodeEditorWindow: React.FC<CodeEditorWindowProps> = ({ onChange, language,
   const [value, setValue] = useState(code || "");
   const fileData = useAppSelector(state => state.fileContent);
   const currentFile = useAppSelector(state => state.currentFile);
+  
 
   const handleEditorChange = (value: string | undefined) => {
     if (value === undefined) {
@@ -17,12 +18,14 @@ const CodeEditorWindow: React.FC<CodeEditorWindowProps> = ({ onChange, language,
   };
 
   useEffect(() => {
-    const currentContent = fileData.filter(file => file.name === currentFile.value)[0];
-    setValue(currentContent?.content);
+    if (fileData && currentFile) {
+      const currentContent = fileData.filter(file => file.name === currentFile.value)[0];
+      setValue(currentContent?.content);
+    }
   }, [currentFile, fileData]);
 
   return (
-    <div className="overlay rounded-md overflow-hidden w-full h-full shadow-4xl">
+    <div className="overlay rounded-md overflow-hidden w-full h-[590px] shadow-4xl">
       <Editor
         height="90vh"
         width={"100%"}

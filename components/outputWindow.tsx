@@ -40,8 +40,8 @@ const OutputWindow: React.FC<{ outputDetails: OutputDetails }> = ({ outputDetail
 
   return (
     <div>
-      <h1 className="font-bold text-xl mb-2">Output</h1>
-      <div className="w-full h-56 bg-gray-800 text-white text-sm overflow-y-auto rounded-md p-2">
+      <h1 className="font-bold text-xl mb-2">Terminal</h1>
+      <div className="w-full h-[550px] bg-gray-800 text-white text-sm overflow-y-auto rounded-md p-2">
         {outputDetails ? <>{getOutput()}</> : null}
       </div>
     </div>
