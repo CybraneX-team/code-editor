@@ -195,3 +195,9 @@ body {
   stroke-dasharray: 100 0;
 } */
 
+
+
+.custom-menu-paper {
+  opacity: 1 !important;
+  transform: none !important;
+}

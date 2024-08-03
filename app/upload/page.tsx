@@ -82,29 +82,23 @@ const CreateNewProject: React.FC = () => {
               }`}
             >
               <div
-                className="flex-1 w-full border-2 bg-[#6a6a6a] border-dashed border-[#1f2937] rounded-lg flex flex-col items-center justify-center"
+                className="flex-1 w-full border-2 bg-[#444444] border-dashed border-[#1f2937] rounded-lg flex flex-col items-center justify-center"
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
               >
-                <svg
-                  className="h-24 text-white"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M7 10V9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V10C19.2091 10 21 11.7909 21 14C21 15.4806 20.1956 16.8084 19 17.5M7 10C4.79086 10 3 11.7909 3 14C3 15.4806 3.8044 16.8084 5 17.5M7 10C7.43285 10 7.84965 10.0688 8.24006 10.1959M12 12V21M12 12L15 15M12 12L9 15"
-                    stroke="#000000"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                {isFullScreen ? (
+                  <div className="input-div mb-10">
+                    <div className="input" />
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" stroke-linejoin="round" stroke-linecap="round" viewBox="0 0 24 24" stroke-width="2" fill="none" stroke="currentColor" className="icon"><polyline points="16 16 12 12 8 16"></polyline><line y2="21" x2="12" y1="12" x1="12"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path><polyline points="16 16 12 12 8 16"></polyline></svg>
+                  </div>
+                ) : (
+                  <svg className="text-6xl text-black" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" stroke-linejoin="round" stroke-linecap="round" viewBox="0 0 24 24" stroke-width="2" fill="none" stroke="currentColor"><polyline points="16 16 12 12 8 16"></polyline><line y2="21" x2="12" y1="12" x1="12"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path><polyline points="16 16 12 12 8 16"></polyline></svg>
+                )}
                 <p className="text-center text-black">
-                  Browse File to upload! or
+                  Browse File to upload! <span className={`${isFullScreen ? "" : "hidden"}`}>or</span>
                 </p>
                 <a
-                  className="text-black underline hover:text-[#444444]"
+                  className={`text-black underline hover:text-[#444444] ${isFullScreen ? "" : "hidden"}`}
                   href="#"
                   onClick={handleImportClick}
                 >
@@ -113,7 +107,7 @@ const CreateNewProject: React.FC = () => {
               </div>
               <label
                 htmlFor="file"
-                className="w-full h-10 px-2 rounded-lg cursor-pointer flex items-center justify-end text-black bg-[#6a6a6a]"
+                className="w-full h-10 px-2 rounded-lg cursor-pointer flex items-center justify-end text-black bg-[#444444]"
               >
                 <svg
                   className="h-[100%] fill-[#1e1e1e] bg-gray-600 bg-opacity-10 rounded-full p-0.5 cursor-pointer shadow-md"
@@ -172,10 +166,10 @@ const CreateNewProject: React.FC = () => {
                 />
                 <button className="relative flex justify-center mt-4 items-center px-6 py-3 overflow-hidden font-medium transition-all bg-[#1e1e1e] rounded-md group">
                   <span className="absolute top-0 right-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out bg-[#000] rounded group-hover:-mr-4 group-hover:-mt-4">
-                    <span className="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-[#6a6a6a]"></span>
+                    <span className="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-[#343434]"></span>
                   </span>
                   <span className="absolute bottom-0 rotate-180 left-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out bg-[#000] rounded group-hover:-ml-4 group-hover:-mb-4">
-                    <span className="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-[#6a6a6a]"></span>
+                    <span className="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-[#343434]"></span>
                   </span>
                   <span className="absolute bottom-0 left-0 w-full h-full transition-all duration-500 ease-in-out delay-200 -translate-x-full bg-[#000] rounded-md group-hover:translate-x-0"></span>
                   <span className="relative w-full text-left text-white transition-colors duration-200 ease-in-out group-hover:text-white">

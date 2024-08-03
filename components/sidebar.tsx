@@ -79,8 +79,13 @@ const truncateName = (name: string): string => {
   return name.length > maxLength ? `${name.slice(0, maxLength)}...` : name;
 };
 
-const CodeEditorSidebar: FC = () => {
-  const [files, setFiles] = useState<FileItem[]>([]);
+interface CodeEditorSidebarProps {
+  files: FileItem[];
+  setFiles: React.Dispatch<React.SetStateAction<FileItem[]>>;
+  dispatch: any; // You might want to use a more specific type for dispatch
+}
+
+const CodeEditorSidebar: FC<CodeEditorSidebarProps> = ({ files, setFiles }) => {
   const [openFolders, setOpenFolders] = useState<{ [key: string]: boolean }>(
     {}
   );
@@ -88,6 +93,9 @@ const CodeEditorSidebar: FC = () => {
     mouseX: number;
     mouseY: number;
   } | null>(null);
+  const [copiedItem, setCopiedItem] = useState<FileItem | null>(null);
+  const [renamingItem, setRenamingItem] = useState<FileItem | null>(null);
+  const [newItemName, setNewItemName] = useState<string>("");
   const [selectedItem, setSelectedItem] = useState<FileItem | null>(null);
   const [newFileName, setNewFileName] = useState<string>("");
   const [newFolderName, setNewFolderName] = useState<string>("");
@@ -151,6 +159,10 @@ const CodeEditorSidebar: FC = () => {
     setFiles((prevFiles) => [...prevFiles, ...newFiles]);
     fileItems.forEach((fileItem) => dispatch(addItem(fileItem)));
   };
+
+  useEffect(() => {
+    dispatch(setStructure(files));
+  }, [files, dispatch]);
 
   const handleContextMenu = (event: React.MouseEvent, item: FileItem) => {
     event.preventDefault();
@@ -293,88 +305,187 @@ const CodeEditorSidebar: FC = () => {
     return <IconComponent style={{ fontSize: 18, color: "#c8c8c8" }} />;
   };
 
-  const renderFiles = (fileList: FileItem[], level = 0): JSX.Element[] =>
-    fileList.map((file, index) => (
-      <React.Fragment key={index} sx={{ marginTop: "20px" }}>
-        <ListItem
-          button
-          onContextMenu={(e) => handleContextMenu(e, file)}
-          onClick={() =>
-            file.type === "folder"
-              ? handleToggleFolder(file.name)
-              : dispatch(setCurrentFile(file.name))
+  const handleCopy = (item: FileItem) => {
+    setCopiedItem(item);
+    handleClose();
+  };
+
+  const handlePaste = (targetFolder: FileItem) => {
+    if (copiedItem && targetFolder.type === "folder") {
+      const newItem = JSON.parse(JSON.stringify(copiedItem)); // Deep clone the copied item
+      newItem.name = `Copy of ${newItem.name}`;
+      setFiles((prevFiles) => {
+        const updatedFiles = JSON.parse(JSON.stringify(prevFiles)); // Deep clone the files
+        const addItemToFolder = (folder: FileItem): void => {
+          if (folder.name === targetFolder.name && folder.type === "folder") {
+            if (!folder.files) folder.files = [];
+            folder.files.push(newItem);
+            if (newItem.type === "file") {
+              dispatch(addItem({ name: newItem.name, content: "" }));
+            }
+          } else if (folder.files) {
+            folder.files.forEach(addItemToFolder);
           }
+        };
+        updatedFiles.forEach(addItemToFolder);
+        return updatedFiles;
+      });
+    }
+    handleClose();
+  };
+
+  const handleRename = (item: FileItem) => {
+    setRenamingItem(item);
+    setNewItemName(item.name);
+    handleClose();
+  };
+
+  const handleRenameSubmit = (item: FileItem, newName: string) => {
+    if (item && newName && newName !== item.name) {
+      setFiles((prevFiles) => {
+        const updatedFiles = JSON.parse(JSON.stringify(prevFiles)); // Deep clone
+        const renameItem = (folder: FileItem): void => {
+          if (folder === item) {
+            folder.name = newName;
+            if (folder.type === "file") {
+              dispatch(addItem({ name: newName, content: "" }));
+            }
+          } else if (folder.files) {
+            folder.files.forEach(renameItem);
+          }
+        };
+        updatedFiles.forEach(renameItem);
+        return updatedFiles;
+      });
+    }
+  };
+
+  const RenameInput = ({ item, onRename, onCancel }) => {
+    const [newName, setNewName] = useState(item.name);
+
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      onRename(item, newName);
+    };
+
+    return (
+      <form onSubmit={handleSubmit}>
+        <Input
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+          autoFocus
+          onBlur={onCancel}
           sx={{
             color: "#cccccc",
-            paddingLeft: `${level * 16 + 8}px`,
             fontSize: "13px",
+            backgroundColor: "rgba(255, 255, 255, 0.1)",
             padding: "2px 8px",
-            transition: "background-color 0.2s ease",
-            "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.1)" },
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
+            borderRadius: "2px",
+            "&::before, &::after": { display: "none" },
           }}
-        >
-          <Box
+        />
+      </form>
+    );
+  };
+
+  const renderFiles = (fileList: FileItem[], level = 0): JSX.Element[] =>
+    fileList.map((file, index) => (
+      <React.Fragment key={index}>
+        {renamingItem?.name === file.name ? (
+          <ListItem
+            sx={{ paddingLeft: `${level * 16 + 8}px`, paddingY: "4px" }}
+          >
+            <RenameInput
+              item={file}
+              onRename={(item, newName) => {
+                handleRenameSubmit(item, newName);
+                setRenamingItem(null);
+              }}
+              onCancel={() => setRenamingItem(null)}
+            />
+          </ListItem>
+        ) : (
+          <ListItem
+            button
+            onContextMenu={(e) => handleContextMenu(e, file)}
+            onClick={() =>
+              file.type === "folder"
+                ? handleToggleFolder(file.name)
+                : dispatch(setCurrentFile(file.name))
+            }
             sx={{
+              color: "#cccccc",
+              paddingLeft: `${level * 16 + 8}px`,
+              fontSize: "13px",
+              padding: "2px 8px",
+              transition: "background-color 0.2s ease",
+              "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.1)" },
               display: "flex",
+              justifyContent: "space-between",
               alignItems: "center",
-              overflow: "hidden",
-              flexGrow: 1,
             }}
           >
-            {file.type === "folder" ? (
-              <Folder sx={{ fontSize: 18, marginRight: 1, color: "#dcb67a" }} />
-            ) : (
-              getFileIcon(file.name)
-            )}
-            <Typography
+            <Box
               sx={{
-                marginLeft: "5px",
-                whiteSpace: "nowrap",
+                display: "flex",
+                alignItems: "center",
                 overflow: "hidden",
-                textOverflow: "ellipsis",
-                fontFamily: '"Segoe WPC", "Segoe UI", sans-serif',
+                flexGrow: 1,
               }}
             >
-              {file.name}
-            </Typography>
-          </Box>
-          {file.type === "folder" && (
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-              <Tooltip title="Add File">
-                <IconButton
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddFile(file.name);
-                  }}
-                  size="small"
-                  sx={{ color: "#cccccc", padding: "2px" }}
-                >
-                  <AiFillFileAdd sx={{ fontSize: 18 }} />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Add Folder">
-                <IconButton
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddFolder(file.name);
-                  }}
-                  size="small"
-                  sx={{ color: "#cccccc", padding: "2px" }}
-                >
-                  <AiFillFolderAdd sx={{ fontSize: 18 }} />
-                </IconButton>
-              </Tooltip>
-              {openFolders[file.name] ? (
-                <ExpandMore sx={{ fontSize: 18 }} />
+              {file.type === "folder" ? (
+                <Folder
+                  sx={{ fontSize: 18, marginRight: 1, color: "#dcb67a" }}
+                />
               ) : (
-                <ChevronRight sx={{ fontSize: 18 }} />
+                getFileIcon(file.name)
               )}
+              <Typography
+                sx={{
+                  marginLeft: "5px",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  fontFamily: '"Segoe WPC", "Segoe UI", sans-serif',
+                }}
+              >
+                {file.name}
+              </Typography>
             </Box>
-          )}
-          {/* {file.type === "file" && (
+            {file.type === "folder" && (
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Tooltip title="Add File">
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddFile(file.name);
+                    }}
+                    size="small"
+                    sx={{ color: "#cccccc", padding: "2px" }}
+                  >
+                    <AiFillFileAdd sx={{ fontSize: 18 }} />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Add Folder">
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddFolder(file.name);
+                    }}
+                    size="small"
+                    sx={{ color: "#cccccc", padding: "2px" }}
+                  >
+                    <AiFillFolderAdd sx={{ fontSize: 18 }} />
+                  </IconButton>
+                </Tooltip>
+                {openFolders[file.name] ? (
+                  <ExpandMore sx={{ fontSize: 18 }} />
+                ) : (
+                  <ChevronRight sx={{ fontSize: 18 }} />
+                )}
+              </Box>
+            )}
+            {/* {file.type === "file" && (
             <Tooltip title="Delete">
               <IconButton
                 onClick={(e) => {
@@ -388,7 +499,8 @@ const CodeEditorSidebar: FC = () => {
               </IconButton>
             </Tooltip>
           )} */}
-        </ListItem>
+          </ListItem>
+        )}
         {file.type === "folder" && (
           <Collapse in={openFolders[file.name]} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
@@ -550,17 +662,19 @@ const CodeEditorSidebar: FC = () => {
             ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
             : undefined
         }
+        MenuListProps={{
+          "aria-labelledby": "basic-button",
+        }}
       >
+        <MenuItem onClick={() => handleCopy(selectedItem!)}>Copy</MenuItem>
+        {copiedItem && (
+          <MenuItem onClick={() => handlePaste(selectedItem!)}>Paste</MenuItem>
+        )}
+        <MenuItem onClick={() => handleRename(selectedItem!)}>Rename</MenuItem>
         {selectedItem?.type === "file" && (
-          <div className="p-[-10x]">
-            <MenuItem>Copy</MenuItem>
-            <MenuItem>Cut</MenuItem>
-            <MenuItem>Paste</MenuItem>
-            <MenuItem>Rename</MenuItem>
-            <MenuItem onClick={() => handleDeleteFile(selectedItem.name)}>
-              Delete
-            </MenuItem>
-          </div>
+          <MenuItem onClick={() => handleDeleteFile(selectedItem.name)}>
+            Delete
+          </MenuItem>
         )}
         {selectedItem?.type === "folder" && (
           <>

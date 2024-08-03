@@ -12,6 +12,8 @@ import axios from "axios";
 import OutputDetails from "@/components/outputDetails";
 import { classnames } from "@/utils/general";
 import { Alert, Snackbar } from "@mui/material";
+import { useDispatch } from 'react-redux';
+import { FileItem } from '@/lib/types'; 
 import CodeEditorSidebar from "@/components/sidebar";
 
 const pythonDefault = "#Start writing\n";
@@ -25,6 +27,8 @@ function Editor() {
   const [theme, setTheme] = useState({ value: "cobalt", label: "Cobalt" });
   const [language, setLanguage] = useState(languageOptions[0]);
   const [snackbar, setSnackbar] = useState(false);
+  const [files, setFiles] = useState<FileItem[]>([]);
+  const dispatch = useDispatch();
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [error, setError] = useState(false);
   const enterPress = useKeyPress("Enter");
@@ -181,7 +185,11 @@ function Editor() {
 
   return (
     <div className="flex h-[500px]">
-      <CodeEditorSidebar />
+      <CodeEditorSidebar
+      files={files}
+      setFiles={setFiles}
+      dispatch={dispatch}
+      />
       <div className="flex flex-col w-full">
         <Snackbar
           open={snackbar}

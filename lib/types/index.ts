@@ -1,8 +1,9 @@
 //Type used in storing file structure
 export interface FileItem {
   name: string;
-  type: string;
+  type: "file" | "folder";
   files?: FileItem[];
+  isCut?: boolean;
 }
 
 //Type used in storing file content
