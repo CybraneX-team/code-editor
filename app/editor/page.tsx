@@ -33,6 +33,7 @@ function Editor() {
   const [error, setError] = useState(false);
   const enterPress = useKeyPress("Enter");
   const ctrlPress = useKeyPress("Control");
+  const [sidebarVisible, setSidebarVisible] = useState(true);
 
   const onSelectChange = (
     sl: SetStateAction<{
@@ -43,6 +44,10 @@ function Editor() {
     }>
   ) => {
     setLanguage(sl);
+  };
+
+  const handleAddFile = (newFile: FileItem) => {
+    setFiles(prevFiles => [...prevFiles, newFile]);
   };
 
   const ConfigDropdown = ({ onSelectChange, handleThemeChange, theme }) => {
@@ -183,75 +188,88 @@ function Editor() {
     });
   }, []);
 
+  const toggleSidebar = () => {
+    setSidebarVisible(!sidebarVisible);
+  };
+
   return (
-    <div className="flex h-[500px]">
-      <CodeEditorSidebar
-      files={files}
-      setFiles={setFiles}
-      dispatch={dispatch}
-      />
-      <div className="flex flex-col w-full">
-        <Snackbar
-          open={snackbar}
-          autoHideDuration={5000}
-          onClose={handleSnackbarClose}
+    <div className="flex flex-col h-screen">
+      <div className="flex items-center w-full space-x-4 px-4 py-2 bg-[#1e1e1e]">
+        <button
+          onClick={toggleSidebar}
+          className="text-white px-3 py-1 rounded-md bg-gray-700 hover:bg-gray-600"
         >
-          <Alert
-            onClose={handleSnackbarClose}
-            severity={error ? "error" : "success"}
-            variant="filled"
-          >
-            {snackbarMessage}
-          </Alert>
-        </Snackbar>
-        <div className="flex items-center space-x-4 p-4">
-          {/* <LanguagesDropdown onSelectChange={onSelectChange} />
-          <ThemeDropdown handleThemeChange={handleThemeChange} theme={theme} /> */}
-          <div className="relative">
-            <button
-              onClick={() => setConfigDropdownOpen(!configDropdownOpen)}
-              className="bg-blue-500 text-white px-4 py-2 rounded-md"
-            >
-              Config
-            </button>
-            {configDropdownOpen && (
-              <ConfigDropdown
-                onSelectChange={onSelectChange}
-                handleThemeChange={handleThemeChange}
-                theme={theme}
-              />
-            )}
-          </div>
-          <button
-            onClick={handleCompile}
-            disabled={!code}
-            className={classnames(
-              "bg-green-500 text-white px-5 py-2 rounded-md",
-              !code ? "opacity-50" : ""
-            )}
-          >
-            {processing ? "Processing..." : "Run"}
-          </button>
-          <button className="bg-green-500 text-white px-5 py-2 rounded-md">
-            Save
-          </button>
-        </div>
-        <div className="flex flex-row space-x-4 p-4">
-          <div className="w-3/5">
-            <CodeEditorWindow
-              code={code}
-              onChange={onChange}
-              language={language?.value}
-              theme={theme.value}
+          {sidebarVisible ? '◀' : '▶'}
+        </button>
+        <div className="relative">
+          {configDropdownOpen && (
+            <ConfigDropdown
+              onSelectChange={onSelectChange}
+              handleThemeChange={handleThemeChange}
+              theme={theme}
             />
-          </div>
-          <div className="w-2/5 space-y-4">
-            <OutputWindow outputDetails={outputDetails} />
-            {/* <OutputDetails outputDetails={outputDetails} /> */}
-          </div>
+          )}
         </div>
-        <Footer />
+        <button
+          onClick={handleCompile}
+          disabled={!code}
+          className={classnames(
+            "bg-green-500 text-white px-5 py-2 rounded-md",
+            !code ? "opacity-50" : ""
+          )}
+        >
+          {processing ? "Processing..." : "Run"}
+        </button>
+        <button className="bg-green-500 text-white px-5 py-2 rounded-md">
+          Save
+        </button>
       </div>
+      
+      <div className="flex flex-1 overflow-hidden">
+        <div 
+          className={`transition-all duration-300 ease-in-out ${
+            sidebarVisible ? "w-64" : "w-0"
+          } flex-shrink-0 overflow-hidden`}
+        >
+          <CodeEditorSidebar
+            files={files}
+            setFiles={setFiles}
+            dispatch={dispatch}
+          />
+        </div>
+        <div className="flex flex-col flex-1">
+          <div className="flex flex-1 space-x-4 px-4 overflow-hidden">
+            <div className={sidebarVisible ? "w-2/3" : "w-3/4"}>
+              <CodeEditorWindow
+                onChange={(key, value) => {/* handle onChange */}}
+                code={code}
+                onChange={onChange}
+                language={language?.value}
+                theme={theme.value}
+                onAddFile={handleAddFile}
+              />
+            </div>
+            <div className={sidebarVisible ? "w-1/3" : "w-1/4"}>
+              <OutputWindow outputDetails={outputDetails} />
+            </div>
+          </div>
+          <Footer />
+        </div>
+      </div>
+      
+      <Snackbar
+        open={snackbar}
+        autoHideDuration={5000}
+        onClose={handleSnackbarClose}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={error ? "error" : "success"}
+          variant="filled"
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

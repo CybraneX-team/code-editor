@@ -181,21 +181,23 @@ const CodeEditorSidebar: FC<CodeEditorSidebarProps> = ({ files, setFiles }) => {
     setContextMenu(null);
   };
 
-  const handleAddFile = (folderName: string) => {
-    setNewFileInputVisible({ ...newFileInputVisible, [folderName]: true });
-    handleClose();
-  };
+  // const handleAddFile = (folderName: string) => {
+  //   setNewFileInputVisible({ ...newFileInputVisible, [folderName]: true });
+  //   handleClose();
+  // };
 
-  const handleCreateFile = (folderName: string): void => {
+  const handleCreateFile = (folderName: string | null): void => {
     if (newFileName) {
-      const newFile: FileItem = { name: newFileName, type: "file" };
+      const newFile: FileItem = { name: newFileName, type: "file", content: "" };
       setFiles((prevFiles) => {
+        if (folderName === null || folderName === "root") {
+          return [...prevFiles, newFile];
+        }
         const updatedFiles = [...prevFiles];
         const addFileToFolder = (folder: FileItem): void => {
           if (folder.name === folderName && folder.type === "folder") {
             if (!folder.files?.find((file) => file.name === newFile.name)) {
               folder.files!.push(newFile);
-              dispatch(addItem({ name: newFileName, content: "" }));
             }
           } else if (folder.files) {
             folder.files.forEach(addFileToFolder);
@@ -204,15 +206,20 @@ const CodeEditorSidebar: FC<CodeEditorSidebarProps> = ({ files, setFiles }) => {
         updatedFiles.forEach(addFileToFolder);
         return updatedFiles;
       });
+      dispatch(addItem(newFile));
+      dispatch(setCurrentFile(newFileName));
       setNewFileName("");
-      setNewFileInputVisible({ ...newFileInputVisible, [folderName]: false });
+      setNewFileInputVisible({
+        ...newFileInputVisible,
+        [folderName || "root"]: false,
+      });
     }
   };
 
-  const handleAddFolder = (folderName: string) => {
-    setCreatingFolder(folderName);
-    handleClose();
-  };
+  // const handleAddFolder = (folderName: string) => {
+  //   setCreatingFolder(folderName);
+  //   handleClose();
+  // };
 
   const handleFolderUpload = () => {
     if (fileInputRef.current) {
@@ -228,13 +235,16 @@ const CodeEditorSidebar: FC<CodeEditorSidebarProps> = ({ files, setFiles }) => {
   };
 
   const handleCreateFolder = (): void => {
-    if (newFolderName && creatingFolder) {
+    if (newFolderName) {
       const newFolder: FileItem = {
         name: newFolderName,
         type: "folder",
         files: [],
       };
       setFiles((prevFiles) => {
+        if (creatingFolder === "root") {
+          return [...prevFiles, newFolder];
+        }
         const updatedFiles = [...prevFiles];
         const addFolderToFolder = (folder: FileItem): void => {
           if (folder.name === creatingFolder && folder.type === "folder") {
@@ -307,6 +317,24 @@ const CodeEditorSidebar: FC<CodeEditorSidebarProps> = ({ files, setFiles }) => {
 
   const handleCopy = (item: FileItem) => {
     setCopiedItem(item);
+    handleClose();
+  };
+
+  const handleAddFile = (folderName: string | null) => {
+    if (folderName === null) {
+      setNewFileInputVisible({ ...newFileInputVisible, root: true });
+    } else {
+      setNewFileInputVisible({ ...newFileInputVisible, [folderName]: true });
+    }
+    handleClose();
+  };
+
+  const handleAddFolder = (folderName: string | null) => {
+    if (folderName === null) {
+      setCreatingFolder("root");
+    } else {
+      setCreatingFolder(folderName);
+    }
     handleClose();
   };
 
@@ -388,8 +416,199 @@ const CodeEditorSidebar: FC<CodeEditorSidebarProps> = ({ files, setFiles }) => {
     );
   };
 
-  const renderFiles = (fileList: FileItem[], level = 0): JSX.Element[] =>
-    fileList.map((file, index) => (
+  // const renderFiles = (fileList: FileItem[], level = 0): JSX.Element[] =>
+  //   fileList.map((file, index) => (
+  //     <React.Fragment key={index}>
+  //       {renamingItem?.name === file.name ? (
+  //         <ListItem
+  //           sx={{ paddingLeft: `${level * 16 + 8}px`, paddingY: "4px" }}
+  //         >
+  //           <RenameInput
+  //             item={file}
+  //             onRename={(item, newName) => {
+  //               handleRenameSubmit(item, newName);
+  //               setRenamingItem(null);
+  //             }}
+  //             onCancel={() => setRenamingItem(null)}
+  //           />
+  //         </ListItem>
+  //       ) : (
+  //         <ListItem
+  //           button
+  //           onContextMenu={(e) => handleContextMenu(e, file)}
+  //           onClick={() =>
+  //             file.type === "folder"
+  //               ? handleToggleFolder(file.name)
+  //               : dispatch(setCurrentFile(file.name))
+  //           }
+  //           sx={{
+  //             color: "#cccccc",
+  //             paddingLeft: `${level * 16 + 8}px`,
+  //             fontSize: "13px",
+  //             padding: "2px 8px",
+  //             transition: "background-color 0.2s ease",
+  //             "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.1)" },
+  //             display: "flex",
+  //             justifyContent: "space-between",
+  //             alignItems: "center",
+  //           }}
+  //         >
+  //           <Box
+  //             sx={{
+  //               display: "flex",
+  //               alignItems: "center",
+  //               overflow: "hidden",
+  //               flexGrow: 1,
+  //             }}
+  //           >
+  //             {file.type === "folder" ? (
+  //               <Folder
+  //                 sx={{ fontSize: 18, marginRight: 1, color: "#dcb67a" }}
+  //               />
+  //             ) : (
+  //               getFileIcon(file.name)
+  //             )}
+  //             <Typography
+  //               sx={{
+  //                 marginLeft: "5px",
+  //                 whiteSpace: "nowrap",
+  //                 overflow: "hidden",
+  //                 textOverflow: "ellipsis",
+  //                 fontFamily: '"Segoe WPC", "Segoe UI", sans-serif',
+  //               }}
+  //             >
+  //               {file.name}
+  //             </Typography>
+  //           </Box>
+  //           {file.type === "folder" && (
+  //             <Box sx={{ display: "flex", alignItems: "center" }}>
+  //               <Tooltip title="Add File">
+  //                 <IconButton
+  //                   onClick={(e) => {
+  //                     e.stopPropagation();
+  //                     handleAddFile(file.name);
+  //                   }}
+  //                   size="small"
+  //                   sx={{ color: "#cccccc", padding: "2px" }}
+  //                 >
+  //                   <AiFillFileAdd sx={{ fontSize: 18 }} />
+  //                 </IconButton>
+  //               </Tooltip>
+  //               <Tooltip title="Add Folder">
+  //                 <IconButton
+  //                   onClick={(e) => {
+  //                     e.stopPropagation();
+  //                     handleAddFolder(file.name);
+  //                   }}
+  //                   size="small"
+  //                   sx={{ color: "#cccccc", padding: "2px" }}
+  //                 >
+  //                   <AiFillFolderAdd sx={{ fontSize: 18 }} />
+  //                 </IconButton>
+  //               </Tooltip>
+  //               {openFolders[file.name] ? (
+  //                 <ExpandMore sx={{ fontSize: 18 }} />
+  //               ) : (
+  //                 <ChevronRight sx={{ fontSize: 18 }} />
+  //               )}
+  //             </Box>
+  //           )}
+  //           {/* {file.type === "file" && (
+  //           <Tooltip title="Delete">
+  //             <IconButton
+  //               onClick={(e) => {
+  //                 e.stopPropagation();
+  //                 handleDeleteFile(file.name);
+  //               }}
+  //               size="small"
+  //               sx={{ color: "#cccccc", padding: "2px" }}
+  //             >
+  //               <MdDelete sx={{ fontSize: 18 }} />
+  //             </IconButton>
+  //           </Tooltip>
+  //         )} */}
+  //         </ListItem>
+  //       )}
+  //       {file.type === "folder" && (
+  //         <Collapse in={openFolders[file.name]} timeout="auto" unmountOnExit>
+  //           <List component="div" disablePadding>
+  //             {renderFiles(file.files || [], level + 1)}
+  //             {newFileInputVisible[file.name] && (
+  //               <ListItem
+  //                 sx={{ paddingLeft: `${level * 16 + 24}px`, paddingY: "4px" }}
+  //               >
+  //                 <Input
+  //                   value={newFileName}
+  //                   onChange={(e) => setNewFileName(e.target.value)}
+  //                   placeholder="New File Name"
+  //                   sx={{
+  //                     color: "#cccccc",
+  //                     fontSize: "13px",
+  //                     backgroundColor: "rgba(255, 255, 255, 0.1)",
+  //                     padding: "2px 8px",
+  //                     borderRadius: "2px",
+  //                     marginRight: "8px",
+  //                     "&::before, &::after": { display: "none" },
+  //                   }}
+  //                   onKeyPress={(e) => {
+  //                     if (e.key === "Enter") {
+  //                       handleCreateFile(file.name);
+  //                     }
+  //                   }}
+  //                 />
+  //                 <Tooltip title="Create File">
+  //                   <IconButton
+  //                     onClick={() => handleCreateFile(file.name)}
+  //                     size="small"
+  //                     sx={{ color: "#cccccc", padding: "2px" }}
+  //                   >
+  //                     <Check sx={{ fontSize: 18 }} />
+  //                   </IconButton>
+  //                 </Tooltip>
+  //               </ListItem>
+  //             )}
+  //             {creatingFolder === file.name && (
+  //               <ListItem
+  //                 sx={{ paddingLeft: `${level * 16 + 24}px`, paddingY: "4px" }}
+  //               >
+  //                 <Input
+  //                   value={newFolderName}
+  //                   onChange={(e) => setNewFolderName(e.target.value)}
+  //                   placeholder="New Folder Name"
+  //                   sx={{
+  //                     color: "#cccccc",
+  //                     fontSize: "13px",
+  //                     backgroundColor: "rgba(255, 255, 255, 0.1)",
+  //                     padding: "2px 8px",
+  //                     borderRadius: "2px",
+  //                     marginRight: "8px",
+  //                     "&::before, &::after": { display: "none" },
+  //                   }}
+  //                   onKeyPress={(e) => {
+  //                     if (e.key === "Enter") {
+  //                       handleCreateFolder();
+  //                     }
+  //                   }}
+  //                 />
+  //                 <Tooltip title="Create Folder">
+  //                   <IconButton
+  //                     onClick={handleCreateFolder}
+  //                     size="small"
+  //                     sx={{ color: "#cccccc", padding: "2px" }}
+  //                   >
+  //                     <Check sx={{ fontSize: 18 }} />
+  //                   </IconButton>
+  //                 </Tooltip>
+  //               </ListItem>
+  //             )}
+  //           </List>
+  //         </Collapse>
+  //       )}
+  //     </React.Fragment>
+  //   ));
+
+  const renderFiles = (fileList: FileItem[], level = 0): JSX.Element[] => {
+    const renderedFiles = fileList.map((file, index) => (
       <React.Fragment key={index}>
         {renamingItem?.name === file.name ? (
           <ListItem
@@ -485,26 +704,12 @@ const CodeEditorSidebar: FC<CodeEditorSidebarProps> = ({ files, setFiles }) => {
                 )}
               </Box>
             )}
-            {/* {file.type === "file" && (
-            <Tooltip title="Delete">
-              <IconButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDeleteFile(file.name);
-                }}
-                size="small"
-                sx={{ color: "#cccccc", padding: "2px" }}
-              >
-                <MdDelete sx={{ fontSize: 18 }} />
-              </IconButton>
-            </Tooltip>
-          )} */}
           </ListItem>
         )}
         {file.type === "folder" && (
           <Collapse in={openFolders[file.name]} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-              {renderFiles(file.files || [], level + 1)}
+              {renderFiles(file.files || [], level + 3)}
               {newFileInputVisible[file.name] && (
                 <ListItem
                   sx={{ paddingLeft: `${level * 16 + 24}px`, paddingY: "4px" }}
@@ -579,39 +784,117 @@ const CodeEditorSidebar: FC<CodeEditorSidebarProps> = ({ files, setFiles }) => {
       </React.Fragment>
     ));
 
+    if (level === 0) {
+      if (newFileInputVisible.root) {
+        renderedFiles.push(
+          <ListItem key="new-file-input" sx={{ paddingY: "4px" }}>
+            <Input
+              value={newFileName}
+              onChange={(e) => setNewFileName(e.target.value)}
+              placeholder="New File Name"
+              sx={{
+                color: "#cccccc",
+                fontSize: "13px",
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                padding: "2px 8px",
+                borderRadius: "2px",
+                marginRight: "8px",
+                "&::before, &::after": { display: "none" },
+              }}
+              onKeyPress={(e) => {
+                if (e.key === "Enter") {
+                  handleCreateFile(null);
+                }
+              }}
+            />
+            <Tooltip title="Create File">
+              <IconButton
+                onClick={() => handleCreateFile(null)}
+                size="small"
+                sx={{ color: "#cccccc", padding: "2px" }}
+              >
+                <Check sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Tooltip>
+          </ListItem>
+        );
+      }
+
+      if (creatingFolder === "root") {
+        renderedFiles.push(
+          <ListItem key="new-folder-input" sx={{ paddingY: "4px" }}>
+            <Input
+              value={newFolderName}
+              onChange={(e) => setNewFolderName(e.target.value)}
+              placeholder="New Folder Name"
+              sx={{
+                color: "#cccccc",
+                fontSize: "13px",
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                padding: "2px 8px",
+                borderRadius: "2px",
+                marginRight: "8px",
+                "&::before, &::after": { display: "none" },
+              }}
+              onKeyPress={(e) => {
+                if (e.key === "Enter") {
+                  handleCreateFolder();
+                }
+              }}
+            />
+            <Tooltip title="Create Folder">
+              <IconButton
+                onClick={handleCreateFolder}
+                size="small"
+                sx={{ color: "#cccccc", padding: "2px" }}
+              >
+                <Check sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Tooltip>
+          </ListItem>
+        );
+      }
+    }
+
+    return renderedFiles;
+  };
+
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
   return (
     <Box
+      className="reounded-md"
       sx={{
         width: "350px",
         backgroundColor: "#1e1e1e",
         color: "#fff",
         height: "100vh",
-        padding: "10px",
         overflowY: "auto",
         overflowX: "hidden",
         display: "flex",
         flexDirection: "column",
       }}
     >
-      <Typography variant="h6" sx={{ color: "#fff", marginBottom: "16px" }}>
+      <div className="px-[20px]  rounded-lg">
+        {/* <Typography variant="h6" sx={{ color: "#fff", marginBottom: "16px" }}>
         Code Editor
-      </Typography>
-      <Button
-        variant="contained"
-        sx={{
-          width: "100%",
-          marginBottom: "10px",
-          backgroundColor: "#007acc",
-          "&:hover": { backgroundColor: "#005f99" },
-        }}
-        {...getRootProps()}
-      >
-        Upload Files
-        <input {...getInputProps()} />
-      </Button>
-      {/* <button className="button" {...getRootProps()}>
+            </Typography> */}
+        <Button
+          variant="contained"
+          sx={{
+            width: "200px",
+            marginBottom: "10px",
+            marginLeft: "15px",
+            backgroundColor: "#007acc",
+            "&:hover": { backgroundColor: "#005f99" },
+          }}
+          {...getRootProps()}
+        >
+          Upload Files
+          <input {...getInputProps()} />
+        </Button>
+
+        {/* <button className="button" {...getRootProps()}>
         <svg xmlns="http://www.w3.org/2000/svg">
           <rect className="border" pathLength="100"></rect>
           <rect className="loading" pathLength="100"></rect>
@@ -636,14 +919,14 @@ const CodeEditorSidebar: FC<CodeEditorSidebarProps> = ({ files, setFiles }) => {
         <input {...getInputProps()} />
       </button> */}
 
-      {/* <Button
+        {/* <Button
         variant="contained"
         sx={{ width: '100%', marginBottom: '10px', backgroundColor: '#007acc', '&:hover': { backgroundColor: '#005f99' } }}
         onClick={handleFolderUpload}
       >
         Upload Folder
       </Button> */}
-      {/* <input
+        {/* <input
         type="file"
         ref={fileInputRef}
         style={{ display: 'none' }}
@@ -651,42 +934,55 @@ const CodeEditorSidebar: FC<CodeEditorSidebarProps> = ({ files, setFiles }) => {
         directory=""
         onChange={handleFolderSelected}
       /> */}
-      <span sx={{ marginTop: "50px" }}>Files</span>
-      <List sx={{ flexGrow: 2, overflowY: "auto" }}>{renderFiles(files)}</List>
-      <Menu
-        open={contextMenu !== null}
-        onClose={handleClose}
-        anchorReference="anchorPosition"
-        anchorPosition={
-          contextMenu !== null
-            ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
-            : undefined
-        }
-        MenuListProps={{
-          "aria-labelledby": "basic-button",
-        }}
-      >
-        <MenuItem onClick={() => handleCopy(selectedItem!)}>Copy</MenuItem>
-        {copiedItem && (
-          <MenuItem onClick={() => handlePaste(selectedItem!)}>Paste</MenuItem>
-        )}
-        <MenuItem onClick={() => handleRename(selectedItem!)}>Rename</MenuItem>
-        {selectedItem?.type === "file" && (
-          <MenuItem onClick={() => handleDeleteFile(selectedItem.name)}>
-            Delete
+        <Box className="flex-row" sx={{justifyContent: 'space-between', display:"flex",   flexDirection: "row", }}>
+          Files  
+            <div className="flex flex-row text-xl">
+            <AiFillFileAdd className="mr-1 cursor-pointer" onClick={() => handleAddFile(null)} />
+            <AiFillFolderAdd className="cursor-pointer" onClick={() => handleAddFolder(null)} />
+            </div>
+        </Box>
+        <List sx={{ flexGrow: 2, overflowY: "auto" }}>
+          {renderFiles(files , 0)}
+        </List>
+        <Menu
+          open={contextMenu !== null}
+          onClose={handleClose}
+          anchorReference="anchorPosition"
+          anchorPosition={
+            contextMenu !== null
+              ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
+              : undefined
+          }
+          MenuListProps={{
+            "aria-labelledby": "basic-button",
+          }}
+        >
+          <MenuItem onClick={() => handleCopy(selectedItem!)}>Copy</MenuItem>
+          {copiedItem && (
+            <MenuItem onClick={() => handlePaste(selectedItem!)}>
+              Paste
+            </MenuItem>
+          )}
+          <MenuItem onClick={() => handleRename(selectedItem!)}>
+            Rename
           </MenuItem>
-        )}
-        {selectedItem?.type === "folder" && (
-          <>
-            <MenuItem onClick={() => handleAddFile(selectedItem.name)}>
-              Add File
+          {selectedItem?.type === "file" && (
+            <MenuItem onClick={() => handleDeleteFile(selectedItem.name)}>
+              Delete
             </MenuItem>
-            <MenuItem onClick={() => handleAddFolder(selectedItem.name)}>
-              Add Folder
-            </MenuItem>
-          </>
-        )}
-      </Menu>
+          )}
+          {selectedItem?.type === "folder" && (
+            <>
+              <MenuItem onClick={() => handleAddFile(selectedItem.name)}>
+                Add File
+              </MenuItem>
+              <MenuItem onClick={() => handleAddFolder(selectedItem.name)}>
+                Add Folder
+              </MenuItem>
+            </>
+          )}
+        </Menu>
+      </div>
     </Box>
   );
 };

@@ -8,7 +8,11 @@ import { TbArrowBigUpLinesFilled } from "react-icons/tb";
 import { RiLockPasswordFill } from "react-icons/ri";
 import { BiSolidSend } from "react-icons/bi";
 
-const RegistrationForm = () => {
+interface RegistrationFormProps {
+  toggleForm: () => void;
+}
+
+const RegistrationForm: React.FC<RegistrationFormProps> = ({ toggleForm}) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
@@ -57,7 +61,7 @@ const RegistrationForm = () => {
         <div className="registration-form border-white">
           <header>
             <h1>Sign Up</h1>
-            <p>Fill in all information</p>
+            <a href="#" onClick={toggleForm} className="cursor-pointer hover:underline">Already a user? Login here </a>
           </header>
           <form>
             <div

@@ -4,6 +4,7 @@ export interface FileItem {
   type: "file" | "folder";
   files?: FileItem[];
   isCut?: boolean;
+  content?: string;
 }
 
 //Type used in storing file content

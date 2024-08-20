@@ -8,7 +8,11 @@ import { TbArrowBigUpLinesFilled } from "react-icons/tb";
 import { RiLockPasswordFill } from "react-icons/ri";
 import { BiSolidSend } from "react-icons/bi";
 
-const RegistrationForm = () => {
+interface LoginProps {
+  toggleForm: () => void;
+}
+
+const Login: React.FC<LoginProps> = ({ toggleForm }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
@@ -56,8 +60,8 @@ const RegistrationForm = () => {
       <div className="back">
         <div className="registration-form border-white">
           <header>
-            <h1>Sign Up</h1>
-            <p>Fill in all information</p>
+            <h1>Log In</h1>
+            <a href="#" onClick={toggleForm} className="cursor-pointer hover:underline">Don't have an account? Make one here</a>
           </header>
           <form>
             <div
@@ -87,33 +91,8 @@ const RegistrationForm = () => {
               </div>
             </div>
             <div
-              className={`input-section password-section ${
-                step === 1 ? "" : step > 1 ? "fold-up" : "folded"
-              }`}
-            >
-              <input
-                type="password"
-                placeholder="ENTER YOUR PASSWORD HERE"
-                className="password"
-                value={password}
-                onChange={handlePasswordChange}
-                onKeyPress={handleKeyPress}
-              />
-              <div className="animated-button">
-                <span className={`icon-lock text-2xl ${password ? "next" : ""}`}>
-                  <RiLockPasswordFill />
-                </span>
-                <span
-                  className="next-button text-2xl cursor-pointer password"
-                  onClick={() => password && handleNextStep()}
-                >
-                  <TbArrowBigUpLinesFilled />
-                </span>
-              </div>
-            </div>
-            <div
               className={`input-section repeat-password-section ${
-                step === 2 ? "" : "folded"
+                step === 1 ? "" : "folded"
               }`}
             >
               <input
@@ -140,9 +119,9 @@ const RegistrationForm = () => {
             </div>
             <div
               className="success"
-              style={{ marginTop: step === 3 ? 0 : "-75px" }}
+              style={{ marginTop: step === 2 ? 0 : "-75px" }}
             >
-              <p>ACCOUNT CREATED</p>
+              <p>Welcome back!</p>
             </div>
           </form>
         </div>
@@ -151,4 +130,4 @@ const RegistrationForm = () => {
   );
 };
 
-export default RegistrationForm;
+export default Login;
