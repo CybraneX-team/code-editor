@@ -21,7 +21,7 @@ const OutputWindow: React.FC<{ outputDetails: OutputDetails }> = ({ outputDetail
         fontSize: 14,
         fontFamily: 'Consolas, "Courier New", monospace',
         theme: {
-          background: '#1b2b34',
+          background: '#1e1e1e',
         },
       });
 
