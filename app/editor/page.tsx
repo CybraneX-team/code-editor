@@ -248,7 +248,9 @@ function Editor() {
                 theme={theme.value}
                 onAddFile={handleAddFile}
               />
+
             </div>
+            
             <div className={sidebarVisible ? "w-1/3" : "w-1/4"}>
               <OutputWindow outputDetails={outputDetails} />
             </div>
