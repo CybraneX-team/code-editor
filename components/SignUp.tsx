@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, KeyboardEvent } from "react";
+import React, { useState, KeyboardEvent, ChangeEvent } from "react";
 import "./signup.scss";
-import { Helmet } from "react-helmet";
+// import { Helmet } from "react-helmet";
 import { BsEnvelopeArrowUpFill } from "react-icons/bs";
 import { TbArrowBigUpLinesFilled } from "react-icons/tb";
 import { RiLockPasswordFill } from "react-icons/ri";
@@ -18,15 +18,15 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ toggleForm}) => {
   const [repeatPassword, setRepeatPassword] = useState("");
   const [step, setStep] = useState(0);
 
-  const handleEmailChange = (e) => {
+  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
   };
 
-  const handlePasswordChange = (e) => {
+  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
   };
-
-  const handleRepeatPasswordChange = (e) => {
+  
+  const handleRepeatPasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRepeatPassword(e.target.value);
   };
 
@@ -45,7 +45,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ toggleForm}) => {
 
   return (
     <>
-      <Helmet>
+      {/* <Helmet>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
         <link
           rel="stylesheet"
@@ -56,7 +56,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ toggleForm}) => {
           rel="stylesheet"
           type="text/css"
         />
-      </Helmet>
+      </Helmet> */}
       <div className="back">
         <div className="registration-form border-white">
           <header>

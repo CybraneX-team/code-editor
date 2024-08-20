@@ -18,4 +18,5 @@ export type CodeEditorWindowProps = {
   language?: string;
   code?: string;
   theme?: string;
+  onAddFile: (newFile: FileItem) => void; 
 };

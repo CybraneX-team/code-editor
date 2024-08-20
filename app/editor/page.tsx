@@ -50,23 +50,29 @@ function Editor() {
     setFiles(prevFiles => [...prevFiles, newFile]);
   };
 
-  const ConfigDropdown = ({ onSelectChange, handleThemeChange, theme }) => {
-    return (
-      <div className="absolute mt-2 mb-4 w-100 bg-[#1e1e1e] shadow-sm rounded-md z-10">
-        <div className="flex p-2">
-          <div className="w-1/2 pr-2">
-            <LanguagesDropdown onSelectChange={onSelectChange} />
-          </div>
-          <div className="w-1/2 pl-2">
-            <ThemeDropdown
-              handleThemeChange={handleThemeChange}
-              theme={theme}
-            />
-          </div>
-        </div>
-      </div>
-    );
-  };
+  // type ConfigDropdownProps = {
+  //   onSelectChange: (sl: LanguageOption) => void;
+  //   handleThemeChange: (theme: any) => void;
+  //   theme: { value: string; label: string };
+  // };
+
+  // const ConfigDropdown = ({ onSelectChange, handleThemeChange, theme }) => {
+  //   return (
+  //     <div className="absolute mt-2 mb-4 w-100 bg-[#1e1e1e] shadow-sm rounded-md z-10">
+  //       <div className="flex p-2">
+  //         <div className="w-1/2 pr-2">
+  //           <LanguagesDropdown onSelectChange={onSelectChange} />
+  //         </div>
+  //         <div className="w-1/2 pl-2">
+  //           <ThemeDropdown
+  //             handleThemeChange={handleThemeChange}
+  //             theme={theme}
+  //           />
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // };
 
   const handleSnackbarClose = () => {
     setSnackbar(false);
@@ -201,7 +207,7 @@ function Editor() {
         >
           {sidebarVisible ? '◀' : '▶'}
         </button>
-        <div className="relative">
+        {/* <div className="relative">
           {configDropdownOpen && (
             <ConfigDropdown
               onSelectChange={onSelectChange}
@@ -209,7 +215,7 @@ function Editor() {
               theme={theme}
             />
           )}
-        </div>
+        </div> */}
         <button
           onClick={handleCompile}
           disabled={!code}
@@ -240,14 +246,13 @@ function Editor() {
         <div className="flex flex-col flex-1">
           <div className="flex flex-1 space-x-4 px-4 overflow-hidden">
             <div className={sidebarVisible ? "w-2/3" : "w-3/4"}>
-              <CodeEditorWindow
-                onChange={(key, value) => {/* handle onChange */}}
-                code={code}
-                onChange={onChange}
-                language={language?.value}
-                theme={theme.value}
-                onAddFile={handleAddFile}
-              />
+            <CodeEditorWindow
+              code={code}
+              onChange={onChange}
+              language={language?.value}
+              theme={theme.value}
+              onAddFile={handleAddFile}
+            />
 
             </div>
             

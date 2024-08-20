@@ -43,7 +43,6 @@ import {
   SiCss3,
   SiJson,
   SiMarkdown,
-  SiJava,
   SiCsharp,
   SiCplusplus,
   SiPhp,
@@ -58,12 +57,9 @@ import {
   SiPerl,
   SiLua,
   SiHaskell,
-  SiMatlab,
   SiVim,
   SiShell,
-  SiBash,
   SiPowershell,
-  SiObjectivec,
   SiSolidity,
   SiR,
   SiFiles,
@@ -300,7 +296,6 @@ const CodeEditorSidebar: FC<CodeEditorSidebarProps> = ({ files, setFiles }) => {
       html: SiHtml5,
       css: SiCss3,
       json: BsFiletypeJson,
-      java: SiJava,
       cs: SiCsharp,
       php: SiPhp,
       rb: SiRuby,
@@ -388,19 +383,31 @@ const CodeEditorSidebar: FC<CodeEditorSidebarProps> = ({ files, setFiles }) => {
     }
   };
 
-  const RenameInput = ({ item, onRename, onCancel }) => {
-    const [newName, setNewName] = useState(item.name);
+  interface FileItem {
+    name: string;
+    type: 'file' | 'folder';
+    files?: FileItem[];
+    content?: string;
+  }
+  interface RenameInputProps {
+    item: FileItem;
+    onRename: (item: FileItem, newName: string) => void;
+    onCancel: () => void;
+  }
 
-    const handleSubmit = (e) => {
+  const RenameInput: React.FC<RenameInputProps> = ({ item, onRename, onCancel }) => {
+    const [newName, setNewName] = useState(item.name);
+  
+    const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
       onRename(item, newName);
     };
-
+  
     return (
       <form onSubmit={handleSubmit}>
         <Input
           value={newName}
-          onChange={(e) => setNewName(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewName(e.target.value)}
           autoFocus
           onBlur={onCancel}
           sx={{
@@ -682,7 +689,7 @@ const CodeEditorSidebar: FC<CodeEditorSidebarProps> = ({ files, setFiles }) => {
                     size="small"
                     sx={{ color: "#cccccc", padding: "2px" }}
                   >
-                    <AiFillFileAdd sx={{ fontSize: 18 }} />
+                    <AiFillFileAdd style={{ fontSize: 18 }} />
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Add Folder">
@@ -694,7 +701,7 @@ const CodeEditorSidebar: FC<CodeEditorSidebarProps> = ({ files, setFiles }) => {
                     size="small"
                     sx={{ color: "#cccccc", padding: "2px" }}
                   >
-                    <AiFillFolderAdd sx={{ fontSize: 18 }} />
+                    <AiFillFolderAdd style={{ fontSize: 18 }} />
                   </IconButton>
                 </Tooltip>
                 {openFolders[file.name] ? (

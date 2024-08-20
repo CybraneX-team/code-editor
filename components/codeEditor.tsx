@@ -32,9 +32,11 @@ const CodeEditorWindow: React.FC<CodeEditorWindowProps> = ({ onChange, language,
   useEffect(() => {
     if (fileData && currentFile) {
       const currentContent = fileData.find(file => file.name === currentFile.value);
-      setValue(currentContent?.content || "");
-      if (currentContent && !openFiles.some(file => file.name === currentContent.name)) {
-        setOpenFiles([...openFiles, currentContent]);
+      if (currentContent) {
+        setValue(currentContent.content || "");
+        if (!openFiles.some(file => file.name === currentContent.name)) {
+          setOpenFiles(prevOpenFiles => [...prevOpenFiles, currentContent as FileItem]);
+        }
       }
     }
   }, [currentFile, fileData]);
