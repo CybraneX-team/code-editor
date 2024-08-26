@@ -6,7 +6,7 @@ import React, { SetStateAction, useEffect, useState } from "react";
 import LanguagesDropdown from "@/components/languagesDropdown";
 import ThemeDropdown from "@/components/themeDropdown";
 import CodeEditorWindow from "@/components/codeEditor";
-import OutputWindow from "@/components/outputWindow";
+import DynamicOutputWindow from "@/components/DynamicOutputWindow";
 import Footer from "@/components/footer";
 import axios from "axios";
 import OutputDetails from "@/components/outputDetails";
@@ -257,8 +257,7 @@ function Editor() {
             </div>
             
             <div className={sidebarVisible ? "w-1/3" : "w-1/4"}>
-              <OutputWindow outputDetails={outputDetails} />
-            </div>
+            <DynamicOutputWindow outputDetails={outputDetails} />            </div>
           </div>
           <Footer />
         </div>

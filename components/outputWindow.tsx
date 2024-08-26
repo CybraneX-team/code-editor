@@ -1,7 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Terminal } from 'xterm';
-import { FitAddon } from 'xterm-addon-fit';
-import 'xterm/css/xterm.css';
+
+let Terminal, FitAddon;
+if (typeof window !== 'undefined') {
+  Terminal = require('xterm').Terminal;
+  FitAddon = require('xterm-addon-fit').FitAddon;
+  require('xterm/css/xterm.css');
+}
 
 interface OutputDetails {
   status?: { id: number };
@@ -12,10 +16,10 @@ interface OutputDetails {
 
 const OutputWindow: React.FC<{ outputDetails: OutputDetails }> = ({ outputDetails }) => {
   const terminalRef = useRef<HTMLDivElement>(null);
-  const [terminal, setTerminal] = useState<Terminal | null>(null);
+  const [terminal, setTerminal] = useState<typeof Terminal | null>(null);
 
   useEffect(() => {
-    if (terminalRef.current && !terminal) {
+    if (typeof window !== 'undefined' && terminalRef.current && !terminal) {
       const newTerminal = new Terminal({
         cursorBlink: true,
         fontSize: 14,
@@ -55,41 +59,25 @@ const OutputWindow: React.FC<{ outputDetails: OutputDetails }> = ({ outputDetail
     let statusId = outputDetails?.status?.id;
 
     if (statusId === 6) {
-      return (
-        <pre className="px-2 py-1 text-xs text-red-500">
-          {atob(outputDetails?.compile_output!)}
-        </pre>
-      );
+      return atob(outputDetails?.compile_output!);
     } else if (statusId === 3) {
-      return (
-        <pre className="px-2 py-1 text-xs text-green-500">
-          {outputDetails.stdout !== null ? `${atob(outputDetails.stdout!)}` : null}
-        </pre>
-      );
+      return outputDetails.stdout !== null ? atob(outputDetails.stdout!) : null;
     } else if (statusId === 5) {
-      return (
-        <pre className="px-2 py-1 text-xs text-red-500">
-          {`Time Limit Exceeded`}
-        </pre>
-      );
+      return "Time Limit Exceeded";
     } else {
-      return (
-        <pre className="px-2 py-1 text-xs text-red-500">
-          {outputDetails?.stderr ? `${atob(outputDetails?.stderr!)}` : ''}
-        </pre>
-      );
+      return outputDetails?.stderr ? atob(outputDetails?.stderr!) : '';
     }
   };
-
 
   return (
     <div>
       <h1 className="font-bold text-xl mb-2">Terminal</h1>
-      <div 
-        ref={terminalRef} 
+      <div
+        ref={terminalRef}
         className="w-full h-[600px] rounded-md overflow-hidden"
-      >        {outputDetails ? <>{getOutput()}</> : null}
-</div>
+      >
+        {outputDetails ? getOutput() : null}
+      </div>
     </div>
   );
 };
